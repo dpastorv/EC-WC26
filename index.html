@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Clasificación — Ecuador Copa Mundial 2026</title>
+  <style>
+    :root {
+      --ecu-yellow: #FFD100;
+      --ecu-blue: #0072CE;
+      --ecu-red: #CE1126;
+      --dark: #1a1a2e;
+      --light: #f8f9fa;
+      --card: #ffffff;
+      --border: #e0e0e0;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      color: var(--dark);
+      min-height: 100vh;
+    }
+    header {
+      background: linear-gradient(90deg, var(--ecu-yellow) 0%, var(--ecu-blue) 50%, var(--ecu-red) 100%);
+      color: #fff;
+      text-align: center;
+      padding: 2.5rem 1rem;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    header h1 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    header p {
+      margin: 0;
+      font-size: 1.1rem;
+      opacity: 0.95;
+    }
+    .lang-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.3rem;
+      background: rgba(255,255,255,0.2);
+      padding: 0.3rem;
+      border-radius: 8px;
+    }
+    .lang-toggle button {
+      border: none;
+      background: transparent;
+      color: #fff;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .lang-toggle button.active {
+      background: rgba(255,255,255,0.9);
+      color: var(--ecu-blue);
+    }
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card h2 {
+      margin-top: 0;
+      color: var(--ecu-blue);
+      font-size: 1.4rem;
+      border-bottom: 3px solid var(--ecu-yellow);
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .probability-box {
+      text-align: center;
+      padding: 2rem;
+    }
+    .probability-value {
+      font-size: clamp(4rem, 12vw, 7rem);
+      font-weight: 900;
+      line-height: 1;
+      color: var(--ecu-blue);
+      text-shadow: 2px 2px 0 var(--ecu-yellow);
+    }
+    .probability-label {
+      font-size: 1.2rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+    .probability-detail {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: #555;
+    }
+    .probability-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .probability-sub {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 1rem;
+      border: 2px solid var(--ecu-yellow);
+    }
+    .probability-sub .probability-value {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+    }
+    .probability-sublabel {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ecu-blue);
+      margin-top: 0.5rem;
+    }
+    .status {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-top: 0.75rem;
+    }
+    .status.qualified { background: #d4edda; color: #155724; }
+    .status.possible { background: #fff3cd; color: #856404; }
+    .status.eliminated { background: #f8d7da; color: #721c24; }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-left: 0.5rem;
+      background: var(--ecu-yellow);
+      color: var(--dark);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 0.6rem 0.5rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: var(--ecu-blue);
+      color: #fff;
+      font-weight: 600;
+    }
+    td:first-child, th:first-child {
+      text-align: left;
+    }
+    tr.ecuador {
+      background: #fff9db;
+      font-weight: 700;
+    }
+    tr.qualified { background: #e8f5e9; }
+    tr.third-advance { background: #e3f2fd; }
+    tr.eliminated { opacity: 0.65; }
+    .team-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .flag {
+      width: 24px;
+      height: 18px;
+      object-fit: cover;
+      border-radius: 3px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .group-card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 1rem;
+      border: 1px solid var(--border);
+    }
+    .group-card h3 {
+      margin: 0 0 0.75rem;
+      color: var(--ecu-red);
+      font-size: 1.1rem;
+    }
+    .fixture-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0.5rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .fixture-row:last-child { border-bottom: none; }
+    .fixture-team {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .fixture-team.home { justify-content: flex-end; }
+    .fixture-date {
+      grid-column: 1 / -1;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #777;
+    }
+    .fixture-score {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-weight: 700;
+      min-width: 80px;
+      justify-content: center;
+    }
+    .fixture-score input {
+      width: 44px;
+      padding: 0.35rem;
+      text-align: center;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .fixture-score input:focus {
+      outline: none;
+      border-color: var(--ecu-blue);
+    }
+    .fixture-score .vs {
+      color: #999;
+      font-size: 0.8rem;
+    }
+    .odds-row {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      align-items: center;
+      margin-top: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .odds-row label {
+      font-size: 0.75rem;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+    .odds-row input {
+      width: 50px;
+      padding: 0.25rem;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .odds-row .odds-source {
+      font-size: 0.7rem;
+      color: #888;
+      width: 100%;
+      text-align: center;
+    }
+    .btn {
+      background: var(--ecu-blue);
+      color: #fff;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+    .btn-secondary { background: #6c757d; }
+    .btn-ecu { background: var(--ecu-red); }
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .phase-toggle {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .phase-toggle button {
+      flex: 1;
+      padding: 0.8rem;
+      border: 2px solid var(--ecu-blue);
+      background: #fff;
+      color: var(--ecu-blue);
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .phase-toggle button.active {
+      background: var(--ecu-blue);
+      color: #fff;
+    }
+    .hidden { display: none !important; }
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    .info {
+      background: #e3f2fd;
+      color: #0d47a1;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    .match-group {
+      margin-bottom: 1.5rem;
+    }
+    .match-group h4 {
+      margin: 0 0 0.75rem;
+      color: var(--dark);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .match-group h4 .group-badge {
+      background: var(--ecu-yellow);
+      color: var(--dark);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+    .small {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .odds-table th, .odds-table td {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .toggle-section {
+      margin-bottom: 1rem;
+    }
+    .toggle-section label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .toggle-section input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--ecu-blue);
+    }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #e9ecef;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 1rem 0 0.3rem;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--ecu-yellow), var(--ecu-blue));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .autofill-box {
+      background: #fff9db;
+      border: 2px solid var(--ecu-yellow);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .autofill-title {
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+    .autofill-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .btn-autofill {
+      background: #fff;
+      color: var(--ecu-blue);
+      border: 2px solid var(--ecu-blue);
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    .btn-autofill:hover { background: #e3f2fd; }
+    .fixtures-section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--ecu-blue);
+      margin: 1.5rem 0 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .ecuador-section {
+      background: #fff9db;
+      border: 2px solid var(--ecu-yellow);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .group-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--ecu-blue);
+      padding: 0;
+      margin-left: auto;
+    }
+    .group-content.hidden { display: none; }
+    .match-group h4 {
+      cursor: pointer;
+      user-select: none;
+    }
+    .match-odds-toggle {
+      grid-column: 1 / -1;
+      text-align: center;
+      margin-top: 0.2rem;
+    }
+    .match-odds-toggle button {
+      background: none;
+      border: none;
+      color: var(--ecu-blue);
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .odds-row {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+    }
+    .fixture-row.has-score .fixture-score input {
+      border-color: var(--ecu-blue);
+      background: #e3f2fd;
+    }
+    .fixtures-actions-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .fixtures-actions-bar button {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      color: #555;
+    }
+    @media (max-width: 600px) {
+      main { padding: 1rem; }
+      .card { padding: 1rem; margin-bottom: 1rem; }
+      .grid { grid-template-columns: 1fr; }
+      .groups-grid { grid-template-columns: 1fr; }
+      header { padding: 2rem 1rem 1.5rem; }
+      header h1 { font-size: 1.6rem; }
+      header p { font-size: 0.95rem; }
+      .probability-value { font-size: 3.5rem; }
+      .probability-sub .probability-value { font-size: 2.5rem; }
+      .probability-label { font-size: 1rem; }
+      .probability-sublabel { font-size: 0.9rem; }
+      .phase-toggle { flex-direction: column; }
+      .phase-toggle button { font-size: 0.9rem; padding: 0.7rem; }
+      th, td { padding: 0.5rem 0.25rem; font-size: 0.8rem; }
+      .flag { width: 20px; height: 15px; }
+      .lang-toggle { top: 0.5rem; right: 0.5rem; }
+      .lang-toggle button { padding: 0.3rem 0.5rem; font-size: 0.8rem; }
+      .fixture-row {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+        padding: 0.8rem 0;
+      }
+      .fixture-team.home { justify-content: center; }
+      .fixture-team { justify-content: center; font-size: 0.9rem; }
+      .fixture-score { order: -1; }
+      .fixture-score input { width: 56px; padding: 0.5rem; font-size: 1.2rem; }
+      .odds-row {
+        flex-direction: column;
+        gap: 0.3rem;
+        align-items: stretch;
+      }
+      .odds-row label {
+        justify-content: space-between;
+        font-size: 0.85rem;
+      }
+      .odds-row input { width: 64px; }
+      .autofill-buttons { flex-direction: column; }
+      .btn-autofill { width: 100%; }
+      .fixtures-actions-bar { justify-content: center; }
+      .fixtures-section-title { justify-content: center; text-align: center; }
+      .actions { justify-content: center; }
+      .btn { width: 100%; }
+      .table-wrapper { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="lang-toggle">
+      <button id="btn-es" class="active" onclick="setLanguage('es')">ES</button>
+      <button id="btn-en" onclick="setLanguage('en')">EN</button>
+    </div>
+    <h1 id="header-title">🇪🇨 Ecuador Copa Mundial 2026</h1>
+    <p id="header-subtitle">Calculadora de Clasificación</p>
+  </header>
+
+  <main>
+    <div id="loading" class="loading">
+      <h2 id="loading-title">Cargando datos de la Copa Mundial...</h2>
+      <p id="loading-subtitle">Obteniendo información de worldcup26.ir con respaldo en openfootball.</p>
+    </div>
+
+    <div id="error" class="error hidden"></div>
+
+    <div id="app" class="hidden">
+      <div class="phase-toggle">
+        <button id="btn-phase1" class="active" onclick="showPhase(1)">Fase 1: Realidad actual</button>
+        <button id="btn-phase2" onclick="showPhase(2)">Fase 2: Qué pasaría si...</button>
+      </div>
+
+      <section id="phase1">
+        <div class="card probability-box">
+          <div class="probability-label" id="prob-label">Probabilidad de clasificar</div>
+          <div class="probability-grid">
+            <div class="probability-sub">
+              <div id="probability-math" class="probability-value">--%</div>
+              <div class="probability-sublabel" id="prob-math-label">Matemática pura</div>
+              <div class="small" id="prob-math-detail">Todos los resultados igual de probables</div>
+            </div>
+            <div class="probability-sub">
+              <div id="probability-market" class="probability-value">--%</div>
+              <div class="probability-sublabel" id="prob-market-label">Con cuotas de mercado</div>
+              <div class="small" id="prob-market-detail">Ponderado por Polymarket</div>
+            </div>
+          </div>
+          <div id="probability-status" class="status possible">Calculando...</div>
+          <div class="small" id="data-source" style="margin-top: 0.75rem;"></div>
+          <div class="actions" style="justify-content: center;">
+            <button class="btn" onclick="refreshData()">🔄 <span id="refresh-btn">Actualizar datos</span></button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>📊 <span id="odds-title">Cuotas de Polymarket</span></h2>
+          <p class="small" id="odds-desc">Probabilidad implícita de cada equipo para ganar el Mundial 2026, según el mercado de predicción Polymarket.</p>
+          <div id="polymarket-odds"></div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h2>🇪🇨 <span id="group-e-title">Grupo E</span></h2>
+            <div id="group-e-table"></div>
+          </div>
+          <div class="card">
+            <h2>🏆 <span id="third-title">Tabla de Terceros</span></h2>
+            <div id="third-place-table"></div>
+            <p class="small" id="third-note">Los 8 mejores terceros avanzan. Ecuador está resaltado.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🌍 <span id="all-groups-title">Todos los Grupos</span></h2>
+          <div id="all-groups" class="groups-grid"></div>
+        </div>
+      </section>
+
+      <section id="phase2" class="hidden">
+        <div class="card">
+          <h2>🔮 <span id="phase2-title">Fase 2: Qué pasaría si...</span></h2>
+          <p id="phase2-desc">Juega con los resultados de los partidos que faltan. Solo necesitas llenar los marcadores; las cuotas de Polymarket se usan automáticamente, pero puedes cambiarlas si quieres.</p>
+
+          <div class="toggle-section">
+            <label>
+              <input type="checkbox" id="use-market-odds" checked onchange="render()">
+              <span id="use-market-label">Usar cuotas de Polymarket para ponderar las simulaciones</span>
+            </label>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-text" id="progress-text">0 de 0 resultados ingresados</div>
+
+          <div class="autofill-box">
+            <div class="autofill-title" id="autofill-title">Predicción de Polymarket</div>
+            <p class="small" id="autofill-desc" style="margin-top:-0.5rem;margin-bottom:0.75rem;text-align:center;">
+              Rellena automáticamente todos los partidos restantes con el resultado más probable según las cuotas de Polymarket. Luego puedes ajustar los marcadores a mano.
+            </p>
+            <div class="autofill-buttons">
+              <button class="btn btn-autofill" onclick="autofillPredictions()">🔮 <span id="btn-autofill">Autofill con Polymarket</span></button>
+            </div>
+          </div>
+
+          <div id="fixtures-editor"></div>
+          <div class="actions">
+            <button class="btn btn-ecu" onclick="applyHypothetical()" id="recalc-btn">Recalcular con estos valores</button>
+            <button class="btn btn-secondary" onclick="resetHypothetical()" id="reset-btn">Restablecer datos en vivo</button>
+          </div>
+        </div>
+
+        <div class="card probability-box">
+          <div class="probability-label" id="hypo-label">Probabilidad hipotética de clasificar</div>
+          <div id="hypothetical-probability" class="probability-value">--%</div>
+          <div id="hypothetical-status" class="status possible">Ingresa valores y haz clic en Recalcular</div>
+        </div>
+
+        <div class="grid">
+          <div class="card">
+            <h2>🇪🇨 <span id="hypo-group-title">Grupo E (Hipotético)</span></h2>
+            <div id="hypothetical-group-e"></div>
+          </div>
+          <div class="card">
+            <h2>🏆 <span id="hypo-third-title">Tabla de Terceros (Hipotético)</span></h2>
+            <div id="hypothetical-third-place"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // ===== Translations =====
+    const TRANSLATIONS = {
+      es: {
+        headerTitle: '🇪🇨 Ecuador Copa Mundial 2026',
+        headerSubtitle: 'Calculadora de Clasificación — 48 equipos, 12 grupos, avanzan los 2 primeros + 8 mejores terceros',
+        loadingTitle: 'Cargando datos de la Copa Mundial...',
+        loadingSubtitle: 'Obteniendo información de worldcup26.ir con respaldo en openfootball.',
+        phase1: 'Fase 1: Realidad actual',
+        phase2: 'Fase 2: Qué pasaría si...',
+        probLabel: 'Probabilidad de clasificar',
+        calculating: 'Calculando...',
+        probMathLabel: 'Matemática pura',
+        probMathDetail: 'Todos los resultados igual de probables',
+        probMarketLabel: 'Con cuotas de mercado',
+        probMarketDetail: 'Ponderado por Polymarket',
+        probDetailRandom: 'Basado en 10,000 simulaciones aleatorias de los partidos restantes.',
+        probDetailMatch: 'Basado en 10,000 simulaciones ponderadas con cuotas de resultado de partido de Polymarket.',
+        probDetailMarket: 'Basado en 10,000 simulaciones ponderadas con cuotas de ganador del torneo de Polymarket.',
+        probDetailManual: 'Basado en 10,000 simulaciones ponderadas con las cuotas que ingresaste.',
+        refreshBtn: 'Actualizar datos',
+        oddsTitle: 'Cuotas de Polymarket',
+        oddsDesc: 'Probabilidad implícita de ganar el Mundial 2026 según Polymarket: los 4 favoritos y Ecuador con su posición actual en el ranking.',
+        groupETitle: 'Grupo E',
+        thirdTitle: 'Tabla de Terceros',
+        thirdNote: 'Los 8 mejores terceros avanzan. Ecuador está resaltado.',
+        allGroupsTitle: 'Todos los Grupos',
+        phase2Title: 'Fase 2: Qué pasaría si...',
+        phase2Desc: 'Juega con los resultados de los partidos que faltan. Solo necesitas llenar los marcadores; las cuotas de Polymarket se usan automáticamente, pero puedes cambiarlas si quieres.',
+        useMarketLabel: 'Usar cuotas de Polymarket para ponderar las simulaciones',
+        recalcBtn: 'Recalcular con estos valores',
+        resetBtn: 'Restablecer datos en vivo',
+        ecuadorMatches: '🇪🇨 Partidos de Ecuador',
+        otherMatches: 'Otros partidos',
+        autofillTitle: 'Predicción de Polymarket',
+        autofillDesc: 'Rellena automáticamente todos los partidos restantes con el resultado más probable según las cuotas de Polymarket. Luego puedes ajustar los marcadores a mano.',
+        autofillBtn: 'Autofill con Polymarket',
+        progress: '{filled} de {total} resultados ingresados',
+        expandAll: 'Expandir todo',
+        collapseAll: 'Colapsar todo',
+        showOdds: 'Mostrar cuotas ▼',
+        hideOdds: 'Ocultar cuotas ▲',
+        oddsHint: 'Deja las cuotas en blanco para usar las de Polymarket.',
+        hypoLabel: 'Probabilidad hipotética de clasificar',
+        hypoGroupTitle: 'Grupo E (Hipotético)',
+        hypoThirdTitle: 'Tabla de Terceros (Hipotético)',
+        enterScores: 'Ingresa resultados y haz clic en Recalcular',
+        qualified: 'Actualmente clasificado',
+        possible: 'Todavía es posible',
+        eliminated: 'Eliminado',
+        veryLikely: 'Muy probable',
+        dataSource: 'Fuente de datos',
+        marketSource: 'Fuente de cuotas',
+        noOdds: 'Sin cuotas de mercado',
+        matchOdds: 'Cuotas de partido Polymarket',
+        autoOdds: 'Cuotas de ganador Polymarket',
+        manualOdds: 'Cuotas manuales',
+        mixedOdds: 'Mixto (Polymarket + manual)',
+        poweredBy: 'Ponderado por mercado',
+        tableRank: '#',
+        tableTeam: 'Equipo',
+        tableMP: 'PJ',
+        tableW: 'G',
+        tableD: 'E',
+        tableL: 'P',
+        tableGF: 'GF',
+        tableGA: 'GC',
+        tableGD: 'DG',
+        tablePts: 'Pts',
+        tableGroup: 'Grupo',
+        remaining: 'restantes',
+        allMatchesPlayed: 'Todos los partidos de grupo se han jugado.',
+        errorLoading: 'Error al cargar datos',
+        oddsTeam: 'Equipo',
+        oddsImplied: 'Prob. ganar Mundial',
+        scorePlaceholder: '-',
+        homeWin: 'Local',
+        draw: 'Empate',
+        awayWin: 'Visitante',
+        percent: '%'
+      },
+      en: {
+        headerTitle: '🇪🇨 Ecuador World Cup 2026',
+        headerSubtitle: 'Qualification Calculator — 48 teams, 12 groups, top 2 + 8 best thirds advance',
+        loadingTitle: 'Loading World Cup data...',
+        loadingSubtitle: 'Fetching from worldcup26.ir with openfootball fallback.',
+        phase1: 'Phase 1: Current Reality',
+        phase2: 'Phase 2: What-If',
+        probLabel: 'Chance of advancing',
+        calculating: 'Calculating...',
+        probMathLabel: 'Pure math',
+        probMathDetail: 'All outcomes equally likely',
+        probMarketLabel: 'With market odds',
+        probMarketDetail: 'Weighted by Polymarket',
+        probDetailRandom: 'Based on 10,000 random simulations of remaining matches.',
+        probDetailMatch: 'Based on 10,000 simulations weighted with Polymarket match-outcome odds.',
+        probDetailMarket: 'Based on 10,000 simulations weighted with Polymarket tournament-winner odds.',
+        probDetailManual: 'Based on 10,000 simulations weighted with your entered odds.',
+        refreshBtn: 'Refresh data',
+        oddsTitle: 'Polymarket Odds',
+        oddsDesc: 'Implied probability of winning the 2026 World Cup from Polymarket: top 4 favorites and Ecuador with its current ranking position.',
+        groupETitle: 'Group E',
+        thirdTitle: 'Third-Place Table',
+        thirdNote: 'Top 8 third-placed teams advance. Ecuador is highlighted.',
+        allGroupsTitle: 'All Groups',
+        phase2Title: 'Phase 2: What-If Scenario',
+        phase2Desc: 'Play with the results of the remaining matches. Just fill in the scores; Polymarket odds are used automatically, but you can override them if you want.',
+        useMarketLabel: 'Use Polymarket odds to weight simulations',
+        recalcBtn: 'Recalculate with these values',
+        resetBtn: 'Reset to live data',
+        ecuadorMatches: "🇪🇨 Ecuador's matches",
+        otherMatches: 'Other matches',
+        autofillTitle: 'Polymarket prediction',
+        autofillDesc: 'Automatically fill all remaining matches with the most likely result according to Polymarket odds. Then you can adjust the scores manually.',
+        autofillBtn: 'Autofill with Polymarket',
+        progress: '{filled} of {total} scores entered',
+        expandAll: 'Expand all',
+        collapseAll: 'Collapse all',
+        showOdds: 'Show odds ▼',
+        hideOdds: 'Hide odds ▲',
+        oddsHint: 'Leave odds blank to use Polymarket odds.',
+        hypoLabel: 'Hypothetical chance of advancing',
+        hypoGroupTitle: 'Group E (What-If)',
+        hypoThirdTitle: 'Third-Place Table (What-If)',
+        enterScores: 'Enter scores and click Recalculate',
+        qualified: 'Currently qualified',
+        possible: 'Still possible',
+        eliminated: 'Eliminated',
+        veryLikely: 'Very likely',
+        dataSource: 'Data source',
+        marketSource: 'Odds source',
+        noOdds: 'No market odds',
+        matchOdds: 'Polymarket match odds',
+        autoOdds: 'Polymarket winner odds',
+        manualOdds: 'Manual odds',
+        mixedOdds: 'Mixed (Polymarket + manual)',
+        poweredBy: 'Market-weighted',
+        tableRank: '#',
+        tableTeam: 'Team',
+        tableMP: 'MP',
+        tableW: 'W',
+        tableD: 'D',
+        tableL: 'L',
+        tableGF: 'GF',
+        tableGA: 'GA',
+        tableGD: 'GD',
+        tablePts: 'Pts',
+        tableGroup: 'Group',
+        remaining: 'remaining',
+        allMatchesPlayed: 'All group-stage matches have been played.',
+        errorLoading: 'Error loading data',
+        oddsTeam: 'Team',
+        oddsImplied: 'Win World Cup %',
+        scorePlaceholder: '-',
+        homeWin: 'Home',
+        draw: 'Draw',
+        awayWin: 'Away',
+        percent: '%'
+      }
+    };
+
+    let lang = localStorage.getItem('wc26-lang') || 'es';
+
+    function setLanguage(l, shouldRender = true) {
+      lang = l;
+      localStorage.setItem('wc26-lang', l);
+      document.documentElement.lang = l;
+      document.getElementById('btn-es').classList.toggle('active', l === 'es');
+      document.getElementById('btn-en').classList.toggle('active', l === 'en');
+      renderStaticText();
+      if (shouldRender) render();
+    }
+
+    function t(key) {
+      return TRANSLATIONS[lang][key] || key;
+    }
+
+    function renderStaticText() {
+      document.getElementById('header-title').textContent = t('headerTitle');
+      document.getElementById('header-subtitle').textContent = t('headerSubtitle');
+      document.getElementById('loading-title').textContent = t('loadingTitle');
+      document.getElementById('loading-subtitle').textContent = t('loadingSubtitle');
+      document.getElementById('btn-phase1').textContent = t('phase1');
+      document.getElementById('btn-phase2').textContent = t('phase2');
+      document.getElementById('prob-label').textContent = t('probLabel');
+      document.getElementById('prob-math-label').textContent = t('probMathLabel');
+      document.getElementById('prob-math-detail').textContent = t('probMathDetail');
+      document.getElementById('prob-market-label').textContent = t('probMarketLabel');
+      document.getElementById('prob-market-detail').textContent = t('probMarketDetail');
+      document.getElementById('refresh-btn').textContent = t('refreshBtn');
+      document.getElementById('odds-title').textContent = t('oddsTitle');
+      document.getElementById('odds-desc').textContent = t('oddsDesc');
+      document.getElementById('group-e-title').textContent = t('groupETitle');
+      document.getElementById('third-title').textContent = t('thirdTitle');
+      document.getElementById('third-note').textContent = t('thirdNote');
+      document.getElementById('all-groups-title').textContent = t('allGroupsTitle');
+      document.getElementById('phase2-title').textContent = t('phase2Title');
+      document.getElementById('phase2-desc').textContent = t('phase2Desc');
+      document.getElementById('use-market-label').textContent = t('useMarketLabel');
+      document.getElementById('recalc-btn').textContent = t('recalcBtn');
+      document.getElementById('reset-btn').textContent = t('resetBtn');
+      document.getElementById('hypo-label').textContent = t('hypoLabel');
+      document.getElementById('hypo-group-title').textContent = t('hypoGroupTitle');
+      document.getElementById('hypo-third-title').textContent = t('hypoThirdTitle');
+      document.getElementById('autofill-title').textContent = t('autofillTitle');
+      document.getElementById('autofill-desc').textContent = t('autofillDesc');
+      document.getElementById('btn-autofill').textContent = t('autofillBtn');
+    }
+
+    // ===== Configuration =====
+    const ECUADOR_NAME = 'Ecuador';
+    const GROUP_NAMES = ['A','B','C','D','E','F','G','H','I','J','K','L'];
+    const API_PRIMARY_GAMES = 'https://worldcup26.ir/get/games';
+    const API_PRIMARY_GROUPS = 'https://worldcup26.ir/get/groups';
+    const API_PRIMARY_TEAMS = 'https://worldcup26.ir/get/teams';
+    const API_FALLBACK = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+    const API_POLYMARKET = 'https://gamma-api.polymarket.com/markets?limit=100';
+    const API_POLYMARKET_EVENT = 'https://gamma-api.polymarket.com/events/slug';
+    const SIMULATIONS = 10000;
+    const ODDS_CACHE_MINUTES = 15;
+
+    const TEAM_CODES = {
+      'Panama':'pan','Croatia':'cro','Colombia':'col','Democratic Republic of the Congo':'cod',
+      'Scotland':'sco','Brazil':'bra','Morocco':'mar','Haiti':'hai',
+      'South Africa':'rsa','South Korea':'kr','Czech Republic':'cze','Mexico':'mex',
+      'Bosnia and Herzegovina':'bih','Qatar':'qat','Switzerland':'sui','Canada':'can',
+      'Curaçao':'cuw','Ivory Coast':'civ','Ecuador':'ecu','Germany':'ger',
+      'Paraguay':'par','Australia':'aus','Turkey':'tur','United States':'usa',
+      'Japan':'jpn','Sweden':'swe','Tunisia':'tun','Netherlands':'ned',
+      'Senegal':'sen','Iraq':'irq','Norway':'nor','France':'fra',
+      'Egypt':'egy','Iran':'irn','New Zealand':'nzl','Belgium':'bel',
+      'Cape Verde':'cpv','Saudi Arabia':'ksa','Uruguay':'uru','Spain':'esp',
+      'England':'eng','Ghana':'gha','Algeria':'alg','Austria':'aut',
+      'Jordan':'jor','Argentina':'arg','Portugal':'por','Uzbekistan':'uzb'
+    };
+
+    // ===== State =====
+    let state = {
+      teams: {},
+      matches: [],
+      standings: {},
+      thirdPlace: [],
+      probability: null,       // market-weighted
+      probabilityMath: null,    // pure math (equal probabilities)
+      dataSource: '',
+      ecuadorId: null,
+      hypothetical: null, // map matchId -> {home, away}
+      manualOdds: null,   // map matchId -> {home, draw, away} as decimals 0-1
+      matchOdds: {},      // map matchId -> {home, draw, away} from Polymarket match markets
+      polymarketOdds: {}, // map teamName -> win probability (tournament winner fallback)
+      useMarketOdds: true,
+      hypotheticalProbability: null,
+      oddsSource: '',
+      collapsedGroups: new Set(),
+      expandedOdds: new Set()
+    };
+
+    // ===== Utilities =====
+    function safeInt(v, def = 0) {
+      const n = parseInt(v, 10);
+      return isNaN(n) ? def : n;
+    }
+
+    function safeFloat(v, def = 0) {
+      const n = parseFloat(v);
+      return isNaN(n) ? def : n;
+    }
+
+    function teamName(id) {
+      return state.teams[id]?.name_en || state.teams[id]?.name || id;
+    }
+
+    function teamFlag(id) {
+      const t = state.teams[id];
+      if (t?.flag) return t.flag;
+      if (t?.iso2) return `https://flagcdn.com/w80/${t.iso2.toLowerCase()}.png`;
+      return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="24" height="18"%3E%3Crect width="24" height="18" fill="%23ddd"/%3E%3C/svg%3E';
+    }
+
+    function normalizeName(name) {
+      return name.toLowerCase()
+        .replace(/&/g, 'and')
+        .replace(/[^a-z0-9]/g, '')
+        .replace(/andherzegovina/g, 'herzegovina')
+        .replace(/bosniaandherzegovina/g, 'bosniaherzegovina')
+        .replace(/trkiye/g, 'turkey')
+        .replace(/curaao/g, 'curacao')
+        .replace(/ctedivoire/g, 'ivorycoast')
+        .replace(/unitedstates/g, 'usa')
+        .replace(/southkorea/g, 'korea')
+        .replace(/iran/g, 'ir')
+        .replace(/bosniaand/g, 'bosnia')
+        .replace(/czechrepublic/g, 'czechia')
+        .replace(/cotedivoire/g, 'ivorycoast');
+    }
+
+    function buildNameMap(teams) {
+      const map = {};
+      for (const t of teams) {
+        map[normalizeName(t.name_en || t.name)] = t.id;
+        if (t.fifa_code) map[normalizeName(t.fifa_code)] = t.id;
+      }
+      return map;
+    }
+
+    function findEcuadorId() {
+      for (const [id, t] of Object.entries(state.teams)) {
+        if ((t.name_en || t.name || '').toLowerCase() === 'ecuador') return id;
+      }
+      return null;
+    }
+
+    // ===== Data fetching =====
+    async function fetchJSON(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${url}: ${res.status}`);
+      return res.json();
+    }
+
+    async function fetchData() {
+      // Load World Cup match data
+      try {
+        const [gamesRes, groupsRes, teamsRes] = await Promise.all([
+          fetchJSON(API_PRIMARY_GAMES),
+          fetchJSON(API_PRIMARY_GROUPS),
+          fetchJSON(API_PRIMARY_TEAMS)
+        ]);
+        const games = gamesRes.games || gamesRes;
+        const groups = groupsRes.groups || groupsRes;
+        const teams = teamsRes.teams || teamsRes;
+        normalizeWorldcup26(games, groups, teams);
+        state.dataSource = 'worldcup26.ir (live)';
+      } catch (e) {
+        console.warn('Primary API failed, trying fallback:', e);
+        try {
+          const fallback = await fetchJSON(API_FALLBACK);
+          await normalizeOpenfootball(fallback);
+          state.dataSource = 'openfootball/worldcup.json (fallback)';
+        } catch (e2) {
+          console.error('Fallback also failed:', e2);
+          throw new Error('Could not load data from any source.');
+        }
+      }
+
+      // Load Polymarket odds (best-effort)
+      await fetchPolymarketOdds();
+      await fetchMatchOdds();
+
+      computeAll();
+      render();
+    }
+
+    function normalizeWorldcup26(games, groups, teams) {
+      state.teams = {};
+      for (const t of teams) {
+        state.teams[t.id] = {
+          id: t.id,
+          name_en: t.name_en,
+          name_fa: t.name_fa,
+          flag: t.flag,
+          fifa_code: t.fifa_code,
+          iso2: t.iso2,
+          group: t.groups || t.group
+        };
+      }
+
+      state.matches = games.filter(m => m.type === 'group').map(m => ({
+        id: `wc26-${m.id}`,
+        matchday: safeInt(m.matchday),
+        group: m.group,
+        home_id: m.home_team_id,
+        away_id: m.away_team_id,
+        home_name: m.home_team_name_en,
+        away_name: m.away_team_name_en,
+        home_score: m.finished === 'TRUE' ? safeInt(m.home_score) : null,
+        away_score: m.finished === 'TRUE' ? safeInt(m.away_score) : null,
+        finished: m.finished === 'TRUE',
+        date: m.local_date,
+        source: 'primary'
+      }));
+
+      for (const m of state.matches) {
+        if (!state.teams[m.home_id]) state.teams[m.home_id] = { id: m.home_id, name_en: m.home_name };
+        if (!state.teams[m.away_id]) state.teams[m.away_id] = { id: m.away_id, name_en: m.away_name };
+      }
+    }
+
+    async function normalizeOpenfootball(data) {
+      const matches = data.matches || [];
+      let teams = [];
+      try {
+        const teamsRes = await fetchJSON(API_PRIMARY_TEAMS);
+        teams = teamsRes.teams || teamsRes;
+      } catch (e) {
+        const names = new Set();
+        for (const m of matches) {
+          names.add(m.team1);
+          names.add(m.team2);
+        }
+        teams = Array.from(names).map((n, i) => ({ id: `t${i}`, name_en: n }));
+      }
+      normalizeWorldcup26([], [], teams);
+      const nameMap = buildNameMap(Object.values(state.teams));
+
+      state.matches = matches.filter(m => m.group && m.group.startsWith('Group')).map((m, i) => {
+        const group = m.group.replace('Group ', '');
+        const homeName = m.team1;
+        const awayName = m.team2;
+        const homeId = nameMap[normalizeName(homeName)] || `of-${normalizeName(homeName)}`;
+        const awayId = nameMap[normalizeName(awayName)] || `of-${normalizeName(awayName)}`;
+        if (!state.teams[homeId]) state.teams[homeId] = { id: homeId, name_en: homeName };
+        if (!state.teams[awayId]) state.teams[awayId] = { id: awayId, name_en: awayName };
+        const finished = m.score && m.score.ft && m.score.ft.length === 2;
+        return {
+          id: `of-${i}`,
+          matchday: 1,
+          group: group,
+          home_id: homeId,
+          away_id: awayId,
+          home_name: homeName,
+          away_name: awayName,
+          home_score: finished ? safeInt(m.score.ft[0]) : null,
+          away_score: finished ? safeInt(m.score.ft[1]) : null,
+          finished: finished,
+          date: m.date,
+          source: 'fallback'
+        };
+      });
+    }
+
+    async function fetchPolymarketOdds() {
+      const cached = localStorage.getItem('polymarket-odds-cache');
+      const cachedTime = localStorage.getItem('polymarket-odds-time');
+      const now = Date.now();
+      if (cached && cachedTime && (now - parseInt(cachedTime)) < ODDS_CACHE_MINUTES * 60 * 1000) {
+        try {
+          state.polymarketOdds = JSON.parse(cached);
+          return;
+        } catch (e) {}
+      }
+
+      try {
+        const data = await fetchJSON(API_POLYMARKET);
+        const odds = {};
+        const regex = /Will\s+(.+?)\s+win\s+the\s+2026\s+FIFA\s+World\s+Cup\?/i;
+        for (const m of data) {
+          const q = m.question || '';
+          const match = q.match(regex);
+          if (match && m.outcomePrices) {
+            const team = match[1].trim();
+            const prices = typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices) : m.outcomePrices;
+            if (Array.isArray(prices) && prices.length > 0) {
+              const price = safeFloat(prices[0]);
+              if (price > 0) odds[team] = price;
+            }
+          }
+        }
+        state.polymarketOdds = odds;
+        localStorage.setItem('polymarket-odds-cache', JSON.stringify(odds));
+        localStorage.setItem('polymarket-odds-time', String(now));
+      } catch (e) {
+        console.warn('Polymarket odds fetch failed:', e);
+        state.polymarketOdds = {};
+      }
+    }
+
+    function safeJson(value) {
+      if (value == null) return null;
+      if (Array.isArray(value) || (typeof value === 'object' && value !== null)) return value;
+      try { return JSON.parse(value); } catch { return value; }
+    }
+
+    function parseLocalDate(dateStr) {
+      // worldcup26.ir format: "06/25/2026 16:00"
+      if (!dateStr) return null;
+      const parts = dateStr.split(' ')[0].split('/');
+      if (parts.length !== 3) return null;
+      const [month, day, year] = parts;
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+
+    function buildPolymarketSlug(match) {
+      const homeName = teamName(match.home_id);
+      const awayName = teamName(match.away_id);
+      const homeCode = TEAM_CODES[homeName];
+      const awayCode = TEAM_CODES[awayName];
+      const date = parseLocalDate(match.date);
+      if (!homeCode || !awayCode || !date) return null;
+      return `fifwc-${homeCode}-${awayCode}-${date}`;
+    }
+
+    async function fetchMatchOdds() {
+      const cached = localStorage.getItem('polymarket-match-odds-cache');
+      const cachedTime = localStorage.getItem('polymarket-match-odds-time');
+      const now = Date.now();
+      if (cached && cachedTime && (now - parseInt(cachedTime)) < ODDS_CACHE_MINUTES * 60 * 1000) {
+        try {
+          state.matchOdds = JSON.parse(cached);
+          return;
+        } catch (e) {}
+      }
+
+      state.matchOdds = {};
+      const remaining = state.matches.filter(m => !m.finished);
+      const slugs = [];
+      for (const m of remaining) {
+        const slug = buildPolymarketSlug(m);
+        if (slug) {
+          const homeName = teamName(m.home_id);
+          const awayName = teamName(m.away_id);
+          const homeCode = TEAM_CODES[homeName];
+          const awayCode = TEAM_CODES[awayName];
+          slugs.push({ matchId: m.id, slug, homeCode, awayCode });
+        }
+      }
+
+      // Fetch in parallel with limited concurrency
+      const concurrency = 5;
+      const results = [];
+      for (let i = 0; i < slugs.length; i += concurrency) {
+        const batch = slugs.slice(i, i + concurrency);
+        const batchResults = await Promise.all(batch.map(async ({ matchId, slug, homeCode, awayCode }) => {
+          try {
+            const data = await fetchJSON(`${API_POLYMARKET_EVENT}/${slug}`);
+            if (!data || !data.title) return { matchId, odds: null };
+            const markets = data.markets || [];
+            const odds = { home: 0, draw: 0, away: 0 };
+            for (const market of markets) {
+              const prices = safeJson(market.outcomePrices);
+              const price = Array.isArray(prices) && prices.length > 0 ? safeFloat(prices[0]) : 0;
+              if (price <= 0) continue;
+              const marketSlug = (market.slug || '').toLowerCase();
+              const suffix = marketSlug.split('-').pop();
+              if (suffix === 'draw') {
+                odds.draw = price;
+              } else if (suffix === homeCode.toLowerCase()) {
+                odds.home = price;
+              } else if (suffix === awayCode.toLowerCase()) {
+                odds.away = price;
+              }
+            }
+            const sum = odds.home + odds.draw + odds.away;
+            if (sum > 0) {
+              return { matchId, odds: { home: odds.home / sum, draw: odds.draw / sum, away: odds.away / sum } };
+            }
+            return { matchId, odds: null };
+          } catch (e) {
+            return { matchId, odds: null };
+          }
+        }));
+        results.push(...batchResults);
+      }
+
+      for (const r of results) {
+        if (r.odds) state.matchOdds[r.matchId] = r.odds;
+      }
+
+      localStorage.setItem('polymarket-match-odds-cache', JSON.stringify(state.matchOdds));
+      localStorage.setItem('polymarket-match-odds-time', String(now));
+    }
+
+    // ===== Standings computation =====
+    function computeStandingsFromMatches(matches) {
+      const groups = {};
+      for (const g of GROUP_NAMES) groups[g] = {};
+
+      for (const m of matches) {
+        if (!groups[m.group]) continue;
+        if (!groups[m.group][m.home_id]) groups[m.group][m.home_id] = initTeamStats(m.home_id, m.group);
+        if (!groups[m.group][m.away_id]) groups[m.group][m.away_id] = initTeamStats(m.away_id, m.group);
+        if (m.home_score !== null && m.away_score !== null) {
+          applyResult(groups[m.group][m.home_id], groups[m.group][m.away_id], m.home_score, m.away_score);
+        }
+      }
+
+      const sorted = {};
+      for (const g of GROUP_NAMES) {
+        sorted[g] = sortGroupTeams(groups[g], matches.filter(m => m.group === g));
+      }
+      return sorted;
+    }
+
+    function initTeamStats(teamId, group) {
+      return {
+        id: teamId,
+        group,
+        mp: 0, w: 0, d: 0, l: 0, pts: 0, gf: 0, ga: 0, gd: 0
+      };
+    }
+
+    function applyResult(home, away, homeScore, awayScore) {
+      home.mp++; away.mp++;
+      home.gf += homeScore; home.ga += awayScore;
+      away.gf += awayScore; away.ga += homeScore;
+      home.gd = home.gf - home.ga;
+      away.gd = away.gf - away.ga;
+      if (homeScore > awayScore) {
+        home.w++; home.pts += 3;
+        away.l++;
+      } else if (homeScore < awayScore) {
+        away.w++; away.pts += 3;
+        home.l++;
+      } else {
+        home.d++; away.d++;
+        home.pts++; away.pts++;
+      }
+    }
+
+    function sortGroupTeams(teamMap, groupMatches) {
+      const teams = Object.values(teamMap);
+      teams.sort((a, b) => {
+        if (a.pts !== b.pts) return b.pts - a.pts;
+        if (a.gd !== b.gd) return b.gd - a.gd;
+        if (a.gf !== b.gf) return b.gf - a.gf;
+        const h2h = headToHead(a, b, groupMatches);
+        if (h2h.pts !== 0) return h2h.pts;
+        if (h2h.gd !== 0) return h2h.gd;
+        if (h2h.gf !== 0) return h2h.gf;
+        return teamName(a.id).localeCompare(teamName(b.id));
+      });
+      return teams;
+    }
+
+    function headToHead(a, b, matches) {
+      const ah = initTeamStats(a.id, a.group);
+      const bh = initTeamStats(b.id, b.group);
+      for (const m of matches) {
+        if (!m.finished) continue;
+        if ((m.home_id === a.id && m.away_id === b.id) || (m.home_id === b.id && m.away_id === a.id)) {
+          const home = m.home_id === a.id ? ah : bh;
+          const away = m.away_id === a.id ? ah : bh;
+          applyResult(home, away, m.home_score, m.away_score);
+        }
+      }
+      return {
+        pts: bh.pts - ah.pts,
+        gd: bh.gd - ah.gd,
+        gf: bh.gf - ah.gf
+      };
+    }
+
+    function computeThirdPlace(standings) {
+      const thirds = [];
+      for (const g of GROUP_NAMES) {
+        if (standings[g] && standings[g][2]) {
+          thirds.push(standings[g][2]);
+        }
+      }
+      thirds.sort((a, b) => {
+        if (a.pts !== b.pts) return b.pts - a.pts;
+        if (a.gd !== b.gd) return b.gd - a.gd;
+        if (a.gf !== b.gf) return b.gf - a.gf;
+        return teamName(a.id).localeCompare(teamName(b.id));
+      });
+      return thirds;
+    }
+
+    function isQualified(teamId, standings, thirdPlace) {
+      for (const g of GROUP_NAMES) {
+        const grp = standings[g];
+        if (!grp) continue;
+        if (grp[0]?.id === teamId || grp[1]?.id === teamId) return true;
+        if (grp[2]?.id === teamId) {
+          const rank = thirdPlace.findIndex(t => t.id === teamId);
+          return rank >= 0 && rank < 8;
+        }
+      }
+      return false;
+    }
+
+    // ===== Odds helpers =====
+    function getTeamOdds(teamNameStr) {
+      if (!state.polymarketOdds) return null;
+      // Try exact match
+      if (state.polymarketOdds[teamNameStr]) return state.polymarketOdds[teamNameStr];
+      // Try normalized match
+      const normalized = normalizeName(teamNameStr);
+      for (const [name, price] of Object.entries(state.polymarketOdds)) {
+        if (normalizeName(name) === normalized) return price;
+      }
+      return null;
+    }
+
+    function getMatchProbabilities(m, useMarket) {
+      // Manual odds override everything
+      if (state.manualOdds && state.manualOdds[m.id]) {
+        const o = state.manualOdds[m.id];
+        const sum = o.home + o.draw + o.away;
+        if (sum > 0) {
+          return { home: o.home / sum, draw: o.draw / sum, away: o.away / sum, source: 'manual' };
+        }
+      }
+
+      if (useMarket) {
+        // 1. Try match-level Polymarket odds (most accurate)
+        if (state.matchOdds[m.id]) {
+          return { ...state.matchOdds[m.id], source: 'match' };
+        }
+
+        // 2. Fall back to tournament-winner odds as a proxy of relative strength
+        const homeOdds = getTeamOdds(teamName(m.home_id));
+        const awayOdds = getTeamOdds(teamName(m.away_id));
+        if (homeOdds !== null && awayOdds !== null && homeOdds + awayOdds > 0) {
+          const drawProb = 0.25; // base draw probability
+          const total = homeOdds + awayOdds;
+          return {
+            home: (homeOdds / total) * (1 - drawProb),
+            draw: drawProb,
+            away: (awayOdds / total) * (1 - drawProb),
+            source: 'market'
+          };
+        }
+      }
+
+      return { home: 1/3, draw: 1/3, away: 1/3, source: 'equal' };
+    }
+
+    function getOddsSourceForMatch(m, useMarket) {
+      if (state.manualOdds && state.manualOdds[m.id]) {
+        const o = state.manualOdds[m.id];
+        if (o.home + o.draw + o.away > 0) return 'manual';
+      }
+      if (useMarket) {
+        if (state.matchOdds[m.id]) return 'match';
+        const homeOdds = getTeamOdds(teamName(m.home_id));
+        const awayOdds = getTeamOdds(teamName(m.away_id));
+        if (homeOdds !== null && awayOdds !== null) return 'market';
+      }
+      return 'equal';
+    }
+
+    // ===== Monte Carlo simulation =====
+    function simulateMatch(probs) {
+      const r = Math.random();
+      let homeScore, awayScore;
+      if (r < probs.home) {
+        homeScore = randInt(1, 3);
+        awayScore = randInt(0, Math.min(homeScore - 1, 1));
+      } else if (r < probs.home + probs.away) {
+        awayScore = randInt(1, 3);
+        homeScore = randInt(0, Math.min(awayScore - 1, 1));
+      } else {
+        homeScore = randInt(0, 2);
+        awayScore = homeScore;
+      }
+      return { homeScore, awayScore };
+    }
+
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function cloneMatches(matches) {
+      return matches.map(m => ({ ...m }));
+    }
+
+    function simulateOne(matches, fixed = {}, useMarket = false) {
+      const sim = cloneMatches(matches);
+      for (const m of sim) {
+        if (fixed[m.id] && fixed[m.id].home !== '' && fixed[m.id].away !== '') {
+          m.home_score = safeInt(fixed[m.id].home);
+          m.away_score = safeInt(fixed[m.id].away);
+          m.finished = true;
+        } else if (!m.finished) {
+          const probs = getMatchProbabilities(m, useMarket);
+          const s = simulateMatch(probs);
+          m.home_score = s.homeScore;
+          m.away_score = s.awayScore;
+          m.finished = true;
+        }
+      }
+      const st = computeStandingsFromMatches(sim);
+      const tp = computeThirdPlace(st);
+      return isQualified(state.ecuadorId, st, tp);
+    }
+
+    function runMonteCarlo(matches, fixed = {}, useMarket = false) {
+      let qualified = 0;
+      for (let i = 0; i < SIMULATIONS; i++) {
+        if (simulateOne(matches, fixed, useMarket)) qualified++;
+      }
+      return qualified / SIMULATIONS;
+    }
+
+    function computeAll() {
+      state.ecuadorId = findEcuadorId() || '20';
+      state.standings = computeStandingsFromMatches(state.matches);
+      state.thirdPlace = computeThirdPlace(state.standings);
+      state.useMarketOdds = document.getElementById('use-market-odds')?.checked ?? true;
+      // Phase 1: compute both pure math and market-weighted probabilities
+      state.probabilityMath = runMonteCarlo(state.matches, {}, false);
+      state.probability = runMonteCarlo(state.matches, {}, true);
+      computeOddsSource(true);
+      if (state.hypothetical) {
+        // Phase 2 (hypothetical) uses the checkbox setting
+        state.hypotheticalProbability = runMonteCarlo(state.matches, state.hypothetical, state.useMarketOdds);
+      }
+    }
+
+    // ===== Rendering =====
+    function render() {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+
+      const nowStr = new Date().toLocaleString(lang === 'es' ? 'es-ES' : 'en-US');
+      document.getElementById('data-source').textContent = `${t('dataSource')}: ${state.dataSource} • ${nowStr}`;
+
+      renderProbabilityValues();
+      document.getElementById('group-e-table').innerHTML = renderGroupTable(state.standings['E'], 'E');
+      document.getElementById('third-place-table').innerHTML = renderThirdPlaceTable(state.thirdPlace);
+      document.getElementById('all-groups').innerHTML = renderAllGroups();
+      document.getElementById('polymarket-odds').innerHTML = renderPolymarketOdds();
+
+      renderFixturesEditor();
+      if (state.hypotheticalProbability !== null) {
+        renderProbability('hypothetical-probability', 'hypothetical-status', state.hypotheticalProbability, null, null, true);
+        document.getElementById('hypothetical-group-e').innerHTML = renderGroupTable(computeStandingsFromMatches(applyHypotheticalToMatches()).E, 'E');
+        document.getElementById('hypothetical-third-place').innerHTML = renderThirdPlaceTable(computeThirdPlace(computeStandingsFromMatches(applyHypotheticalToMatches())));
+      }
+    }
+
+    function renderProbabilityValues() {
+      const mathEl = document.getElementById('probability-math');
+      const marketEl = document.getElementById('probability-market');
+      const statusEl = document.getElementById('probability-status');
+
+      if (state.probabilityMath === null || state.probability === null) {
+        mathEl.textContent = '--%';
+        marketEl.textContent = '--%';
+        statusEl.textContent = t('calculating');
+        statusEl.className = 'status possible';
+        return;
+      }
+
+      mathEl.textContent = (state.probabilityMath * 100).toFixed(1) + '%';
+      marketEl.textContent = (state.probability * 100).toFixed(1) + '%';
+
+      const q = isQualified(state.ecuadorId, state.standings, state.thirdPlace);
+      if (q) {
+        statusEl.textContent = t('qualified');
+        statusEl.className = 'status qualified';
+      } else if (state.probability > 0) {
+        statusEl.textContent = t('possible');
+        statusEl.className = 'status possible';
+      } else {
+        statusEl.textContent = t('eliminated');
+        statusEl.className = 'status eliminated';
+      }
+    }
+
+    function renderProbability(valueId, statusId, prob, standings, thirdPlace, isHypothetical) {
+      const el = document.getElementById(valueId);
+      const st = document.getElementById(statusId);
+      const detail = document.getElementById(valueId === 'probability-value' ? 'probability-detail' : null);
+      if (prob === null) {
+        el.textContent = '--%';
+        st.textContent = t('calculating');
+        st.className = 'status possible';
+        return;
+      }
+      el.textContent = (prob * 100).toFixed(1) + '%';
+
+      if (detail) {
+        if (state.oddsSource === 'manual') detail.textContent = t('probDetailManual');
+        else if (state.oddsSource === 'match' || state.oddsSource === 'match-mixed') detail.textContent = t('probDetailMatch');
+        else if (state.oddsSource === 'market' || state.oddsSource.startsWith('mixed')) detail.textContent = t('probDetailMarket');
+        else detail.textContent = t('probDetailRandom');
+      }
+
+      if (standings && thirdPlace) {
+        const q = isQualified(state.ecuadorId, standings, thirdPlace);
+        if (q) {
+          st.textContent = t('qualified');
+          st.className = 'status qualified';
+        } else if (prob > 0) {
+          st.textContent = t('possible');
+          st.className = 'status possible';
+        } else {
+          st.textContent = t('eliminated');
+          st.className = 'status eliminated';
+        }
+      } else {
+        if (prob >= 0.95) { st.textContent = t('veryLikely'); st.className = 'status qualified'; }
+        else if (prob > 0) { st.textContent = t('possible'); st.className = 'status possible'; }
+        else { st.textContent = t('eliminated'); st.className = 'status eliminated'; }
+      }
+    }
+
+    function renderGroupTable(teams, groupName) {
+      if (!teams || !teams.length) return '<p>No data</p>';
+      let html = `<div class="table-wrapper"><table><thead><tr><th>${t('tableRank')}</th><th>${t('tableTeam')}</th><th>${t('tableMP')}</th><th>${t('tableW')}</th><th>${t('tableD')}</th><th>${t('tableL')}</th><th>${t('tableGF')}</th><th>${t('tableGA')}</th><th>${t('tableGD')}</th><th>${t('tablePts')}</th></tr></thead><tbody>`;
+      teams.forEach((t, i) => {
+        const isEcu = t.id === state.ecuadorId;
+        const cls = isEcu ? 'ecuador' : (i < 2 ? 'qualified' : (i === 2 ? 'third-advance' : 'eliminated'));
+        html += `<tr class="${cls}">
+          <td>${i + 1}</td>
+          <td><div class="team-cell"><img class="flag" src="${teamFlag(t.id)}" alt="">${teamName(t.id)}</div></td>
+          <td>${t.mp}</td><td>${t.w}</td><td>${t.d}</td><td>${t.l}</td>
+          <td>${t.gf}</td><td>${t.ga}</td><td>${t.gd > 0 ? '+' + t.gd : t.gd}</td><td>${t.pts}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      return html;
+    }
+
+    function renderThirdPlaceTable(thirds) {
+      if (!thirds || !thirds.length) return '<p>No data</p>';
+      let html = `<div class="table-wrapper"><table><thead><tr><th>${t('tableRank')}</th><th>${t('tableTeam')}</th><th>${t('tableGroup')}</th><th>${t('tableMP')}</th><th>${t('tableGD')}</th><th>${t('tableGF')}</th><th>${t('tablePts')}</th></tr></thead><tbody>`;
+      thirds.forEach((t, i) => {
+        const isEcu = t.id === state.ecuadorId;
+        const cls = isEcu ? 'ecuador' : (i < 8 ? 'third-advance' : 'eliminated');
+        html += `<tr class="${cls}">
+          <td>${i + 1}</td>
+          <td><div class="team-cell"><img class="flag" src="${teamFlag(t.id)}" alt="">${teamName(t.id)}</div></td>
+          <td>${t.group}</td><td>${t.mp}</td><td>${t.gd > 0 ? '+' + t.gd : t.gd}</td><td>${t.gf}</td><td>${t.pts}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+      return html;
+    }
+
+    function renderAllGroups() {
+      return GROUP_NAMES.map(g => {
+        const teams = state.standings[g];
+        return `<div class="group-card"><h3>${t('tableGroup')} ${g}</h3>${renderMiniGroup(teams)}</div>`;
+      }).join('');
+    }
+
+    function renderMiniGroup(teams) {
+      if (!teams) return '';
+      let html = `<table><thead><tr><th>${t('tableRank')}</th><th>${t('tableTeam')}</th><th>${t('tablePts')}</th><th>${t('tableGD')}</th></tr></thead><tbody>`;
+      teams.forEach((t, i) => {
+        const isEcu = t.id === state.ecuadorId;
+        html += `<tr class="${isEcu ? 'ecuador' : ''}">
+          <td>${i + 1}</td>
+          <td><div class="team-cell"><img class="flag" src="${teamFlag(t.id)}" alt="">${teamName(t.id)}</div></td>
+          <td>${t.pts}</td><td>${t.gd > 0 ? '+' + t.gd : t.gd}</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      return html;
+    }
+
+    function renderPolymarketOdds() {
+      const odds = state.polymarketOdds;
+      const entries = Object.entries(odds).sort((a, b) => b[1] - a[1]);
+      if (!entries.length) return `<p class="small">${t('noOdds')}</p>`;
+
+      const ecuadorEntry = entries.find(([team]) => team.toLowerCase() === 'ecuador');
+      const ecuadorRank = ecuadorEntry ? entries.indexOf(ecuadorEntry) + 1 : null;
+
+      let html = `<table class="odds-table"><thead><tr><th>${t('tableRank')}</th><th>${t('oddsTeam')}</th><th>${t('oddsImplied')}</th></tr></thead><tbody>`;
+
+      // Top 4
+      entries.slice(0, 4).forEach(([team, price], i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td><div class="team-cell">${team}</div></td>
+          <td>${(price * 100).toFixed(1)}%</td>
+        </tr>`;
+      });
+
+      // Ecuador as 5th row, showing its actual rank
+      if (ecuadorEntry && ecuadorRank > 4) {
+        html += `<tr class="ecuador">
+          <td>${ecuadorRank}</td>
+          <td><div class="team-cell">🇪🇨 ${ecuadorEntry[0]}</div></td>
+          <td>${(ecuadorEntry[1] * 100).toFixed(1)}%</td>
+        </tr>`;
+      } else if (ecuadorEntry) {
+        // Ecuador is in top 4, already shown; no extra row needed
+      } else {
+        html += `<tr class="ecuador">
+          <td>—</td>
+          <td><div class="team-cell">🇪🇨 Ecuador</div></td>
+          <td>—</td>
+        </tr>`;
+      }
+
+      html += '</tbody></table>';
+      return html;
+    }
+
+    // ===== Phase 2: What-if editor =====
+    function renderFixturesEditor() {
+      const container = document.getElementById('fixtures-editor');
+      const remaining = state.matches.filter(m => !m.finished).sort((a, b) => GROUP_NAMES.indexOf(a.group) - GROUP_NAMES.indexOf(b.group) || a.matchday - b.matchday);
+      if (!remaining.length) {
+        container.innerHTML = `<p>${t('allMatchesPlayed')}</p>`;
+        updateProgress(0, 0);
+        return;
+      }
+
+      const useMarket = document.getElementById('use-market-odds')?.checked ?? true;
+      const ecuadorId = state.ecuadorId;
+      const ecuadorMatches = remaining.filter(m => m.home_id === ecuadorId || m.away_id === ecuadorId);
+      const otherMatches = remaining.filter(m => m.home_id !== ecuadorId && m.away_id !== ecuadorId);
+
+      // Update progress bar
+      const filledCount = Object.keys(state.hypothetical || {}).length;
+      updateProgress(filledCount, remaining.length);
+
+      let html = '';
+
+      // Ecuador's matches (pinned)
+      if (ecuadorMatches.length) {
+        html += `<div class="fixtures-section-title">${t('ecuadorMatches')}</div>`;
+        html += `<div class="ecuador-section">`;
+        for (const m of ecuadorMatches) html += renderFixtureRow(m, useMarket);
+        html += '</div>';
+      }
+
+      // Other matches grouped
+      if (otherMatches.length) {
+        const byGroup = {};
+        for (const m of otherMatches) {
+          if (!byGroup[m.group]) byGroup[m.group] = [];
+          byGroup[m.group].push(m);
+        }
+
+        html += `<div class="fixtures-section-title">
+          <span>${t('otherMatches')}</span>
+          <div class="fixtures-actions-bar">
+            <button onclick="expandAllGroups()">${t('expandAll')}</button>
+            <button onclick="collapseAllGroups()">${t('collapseAll')}</button>
+          </div>
+        </div>`;
+
+        for (const g of GROUP_NAMES) {
+          const ms = byGroup[g];
+          if (!ms) continue;
+          const collapsed = state.collapsedGroups.has(g);
+          html += `<div class="match-group">
+            <h4 onclick="toggleGroup('${g}')">
+              <span class="group-badge">${t('tableGroup')} ${g}</span>
+              ${ms.length} ${t('remaining')}
+              <button class="group-toggle" onclick="event.stopPropagation(); toggleGroup('${g}')">${collapsed ? '▶' : '▼'}</button>
+            </h4>
+            <div class="group-content ${collapsed ? 'hidden' : ''}" id="group-content-${g}">`;
+          for (const m of ms) html += renderFixtureRow(m, useMarket);
+          html += '</div></div>';
+        }
+      }
+
+      html += `<p class="small" style="margin-top:1rem;">${t('oddsHint')}</p>`;
+      container.innerHTML = html;
+    }
+
+    function renderFixtureRow(m, useMarket) {
+      const valH = state.hypothetical && state.hypothetical[m.id] ? state.hypothetical[m.id].home : '';
+      const valA = state.hypothetical && state.hypothetical[m.id] ? state.hypothetical[m.id].away : '';
+      const hasScore = valH !== '' && valA !== '';
+      const odds = state.manualOdds && state.manualOdds[m.id] ? state.manualOdds[m.id] : { home: '', draw: '', away: '' };
+      const autoProbs = getMatchProbabilities(m, useMarket);
+      const oddsOpen = state.expandedOdds.has(m.id);
+
+      return `<div class="fixture-row ${hasScore ? 'has-score' : ''}">
+        <div class="fixture-team home">
+          <img class="flag" src="${teamFlag(m.home_id)}" alt="">
+          <span>${teamName(m.home_id)}</span>
+        </div>
+        <div class="fixture-score">
+          <input type="number" min="0" id="h-${m.id}" value="${valH}" placeholder="${t('scorePlaceholder')}">
+          <span class="vs">vs</span>
+          <input type="number" min="0" id="a-${m.id}" value="${valA}" placeholder="${t('scorePlaceholder')}">
+        </div>
+        <div class="fixture-team">
+          <span>${teamName(m.away_id)}</span>
+          <img class="flag" src="${teamFlag(m.away_id)}" alt="">
+        </div>
+        <div class="fixture-date">${m.date || ''}</div>
+        <div class="match-odds-toggle">
+          <button type="button" onclick="toggleMatchOdds('${m.id}')">${oddsOpen ? t('hideOdds') : t('showOdds')}</button>
+        </div>
+        <div class="odds-row ${oddsOpen ? '' : 'hidden'}" id="odds-row-${m.id}">
+          <label>${t('homeWin')} <input type="number" min="0" max="100" step="0.1" id="oh-${m.id}" value="${odds.home !== '' ? (odds.home * 100).toFixed(1) : ''}" placeholder="${(autoProbs.home * 100).toFixed(1)}"></label>
+          <label>${t('draw')} <input type="number" min="0" max="100" step="0.1" id="od-${m.id}" value="${odds.draw !== '' ? (odds.draw * 100).toFixed(1) : ''}" placeholder="${(autoProbs.draw * 100).toFixed(1)}"></label>
+          <label>${t('awayWin')} <input type="number" min="0" max="100" step="0.1" id="oa-${m.id}" value="${odds.away !== '' ? (odds.away * 100).toFixed(1) : ''}" placeholder="${(autoProbs.away * 100).toFixed(1)}"></label>
+        </div>
+      </div>`;
+    }
+
+    function updateProgress(filled, total) {
+      const fill = document.getElementById('progress-fill');
+      const text = document.getElementById('progress-text');
+      if (!fill || !text) return;
+      const pct = total ? (filled / total) * 100 : 0;
+      fill.style.width = pct + '%';
+      text.textContent = t('progress').replace('{filled}', filled).replace('{total}', total);
+    }
+
+    function toggleGroup(group) {
+      if (state.collapsedGroups.has(group)) state.collapsedGroups.delete(group);
+      else state.collapsedGroups.add(group);
+      renderFixturesEditor();
+    }
+
+    function expandAllGroups() {
+      state.collapsedGroups.clear();
+      renderFixturesEditor();
+    }
+
+    function collapseAllGroups() {
+      const otherMatches = state.matches.filter(m => !m.finished && m.home_id !== state.ecuadorId && m.away_id !== state.ecuadorId);
+      for (const m of otherMatches) state.collapsedGroups.add(m.group);
+      renderFixturesEditor();
+    }
+
+    function toggleMatchOdds(matchId) {
+      if (state.expandedOdds.has(matchId)) state.expandedOdds.delete(matchId);
+      else state.expandedOdds.add(matchId);
+      renderFixturesEditor();
+    }
+
+    function autofillPredictions() {
+      const useMarket = document.getElementById('use-market-odds')?.checked ?? true;
+      const hypot = state.hypothetical ? { ...state.hypothetical } : {};
+      const remaining = state.matches.filter(m => !m.finished);
+      for (const m of remaining) {
+        const probs = getMatchProbabilities(m, useMarket);
+        let h, a;
+        if (probs.home >= probs.away && probs.home >= probs.draw) { h = 2; a = 0; }
+        else if (probs.away >= probs.home && probs.away >= probs.draw) { h = 0; a = 2; }
+        else { h = 1; a = 1; }
+        hypot[m.id] = { home: h, away: a };
+      }
+      state.hypothetical = hypot;
+      renderFixturesEditor();
+      applyHypothetical();
+    }
+
+    function applyHypothetical() {
+      const fixed = {};
+      const odds = {};
+      for (const m of state.matches) {
+        const h = document.getElementById(`h-${m.id}`);
+        const a = document.getElementById(`a-${m.id}`);
+        if (h && a && h.value !== '' && a.value !== '') {
+          fixed[m.id] = { home: h.value, away: a.value };
+        }
+        const oh = document.getElementById(`oh-${m.id}`);
+        const od = document.getElementById(`od-${m.id}`);
+        const oa = document.getElementById(`oa-${m.id}`);
+        if (oh && od && oa) {
+          const hv = oh.value === '' ? '' : safeFloat(oh.value) / 100;
+          const dv = od.value === '' ? '' : safeFloat(od.value) / 100;
+          const av = oa.value === '' ? '' : safeFloat(oa.value) / 100;
+          if (hv !== '' || dv !== '' || av !== '') {
+            odds[m.id] = { home: hv === '' ? 0 : hv, draw: dv === '' ? 0 : dv, away: av === '' ? 0 : av };
+          }
+        }
+      }
+      state.hypothetical = fixed;
+      state.manualOdds = odds;
+      computeOddsSource();
+      state.hypotheticalProbability = runMonteCarlo(state.matches, fixed, state.useMarketOdds);
+      render();
+      showPhase(2);
+    }
+
+    function computeOddsSource() {
+      const remaining = state.matches.filter(m => !m.finished);
+      if (!remaining.length) {
+        state.oddsSource = 'equal';
+        return;
+      }
+      // Phase 1 always uses market/match odds when available
+      let hasManual = false;
+      let hasMatch = false;
+      let hasMarket = false;
+      let hasEqual = false;
+      for (const m of remaining) {
+        const src = getOddsSourceForMatch(m, true);
+        if (src === 'manual') hasManual = true;
+        else if (src === 'match') hasMatch = true;
+        else if (src === 'market') hasMarket = true;
+        else hasEqual = true;
+      }
+      if (hasManual) state.oddsSource = hasMatch ? 'mixed-match' : (hasMarket ? 'mixed-market' : 'manual');
+      else if (hasMatch) state.oddsSource = hasMarket || hasEqual ? 'match-mixed' : 'match';
+      else if (hasMarket) state.oddsSource = 'market';
+      else state.oddsSource = 'equal';
+    }
+
+    function applyHypotheticalToMatches() {
+      const matches = cloneMatches(state.matches);
+      if (!state.hypothetical) return matches;
+      for (const m of matches) {
+        if (state.hypothetical[m.id]) {
+          m.home_score = safeInt(state.hypothetical[m.id].home);
+          m.away_score = safeInt(state.hypothetical[m.id].away);
+          m.finished = true;
+        }
+      }
+      return matches;
+    }
+
+    function resetHypothetical() {
+      state.hypothetical = null;
+      state.manualOdds = null;
+      state.hypotheticalProbability = null;
+      render();
+    }
+
+    function showPhase(n) {
+      document.getElementById('phase1').classList.toggle('hidden', n !== 1);
+      document.getElementById('phase2').classList.toggle('hidden', n !== 2);
+      document.getElementById('btn-phase1').classList.toggle('active', n === 1);
+      document.getElementById('btn-phase2').classList.toggle('active', n === 2);
+    }
+
+    // ===== Init =====
+    async function refreshData() {
+      document.getElementById('loading').classList.remove('hidden');
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('error').classList.add('hidden');
+      state.hypothetical = null;
+      state.hypotheticalProbability = null;
+      state.manualOdds = null;
+      await init();
+    }
+
+    async function init() {
+      try {
+        await fetchData();
+      } catch (e) {
+        document.getElementById('loading').classList.add('hidden');
+        const err = document.getElementById('error');
+        err.classList.remove('hidden');
+        err.textContent = `${t('errorLoading')}: ${e.message}`;
+      }
+    }
+
+    setLanguage(lang, false);
+    init();
+  </script>
+</body>
+</html>
