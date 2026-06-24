@@ -411,6 +411,86 @@
       padding: 1rem;
       margin-bottom: 1.5rem;
     }
+    .live-matches-card {
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      border: 2px solid #4caf50;
+    }
+    #live-matches-container, #live-matches-container-2 {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .live-match-row {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    .live-match-team {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 700;
+    }
+    .live-match-team.home { flex-direction: row-reverse; }
+    .live-match-score {
+      font-weight: 900;
+      color: var(--ecu-red);
+      background: #fff;
+      padding: 0.1rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      min-width: 40px;
+      text-align: center;
+    }
+    .live-match-status {
+      font-size: 0.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.1rem 0.4rem;
+      border-radius: 999px;
+      color: #fff;
+      background: #4caf50;
+    }
+    .live-match-status.upcoming { background: #ff9800; }
+    .live-match-status.finished { background: #9e9e9e; }
+    .live-match-time {
+      font-size: 0.75rem;
+      color: #555;
+    }
+    .live-match-context {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      white-space: nowrap;
+      background: #e9ecef;
+      color: #495057;
+    }
+    .live-match-context.very-good { background: #d4edda; color: #155724; }
+    .live-match-context.good { background: #e8f5e9; color: #2e7d32; }
+    .live-match-context.neutral { background: #fff3cd; color: #856404; }
+    .live-match-context.bad { background: #ffccbc; color: #bf360c; }
+    .live-match-context.very-bad { background: #f8d7da; color: #721c24; }
+    .countdown {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--ecu-blue);
+      margin-top: 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .countdown-label {
+      font-size: 0.85rem;
+      color: #666;
+      font-weight: 400;
+    }
     .autofill-title {
       font-weight: 700;
       color: var(--dark);
@@ -545,6 +625,11 @@
       .actions { justify-content: center; }
       .btn { width: 100%; }
       .table-wrapper { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .live-match-row { padding: 0.35rem 0.6rem; font-size: 0.8rem; flex-wrap: wrap; }
+      .live-match-score { font-size: 0.85rem; min-width: 32px; }
+      .live-match-status { font-size: 0.55rem; }
+      .live-match-context { font-size: 0.65rem; width: 100%; text-align: center; margin-top: 0.2rem; }
+      .countdown { font-size: 1.1rem; }
     }
   </style>
 </head>
@@ -573,6 +658,13 @@
       </div>
 
       <section id="phase1">
+        <div id="live-matches-phase1" class="card live-matches-card hidden">
+          <h2>⚽ <span id="live-title">En vivo / Próximos</span></h2>
+          <div id="live-matches-container"></div>
+          <div class="countdown" id="countdown"></div>
+          <div class="small" id="live-note" style="margin-top:0.5rem;">Horarios locales del estadio.</div>
+        </div>
+
         <div class="card probability-box">
           <div class="probability-label" id="prob-label">Probabilidad de clasificar</div>
           <div class="probability-grid">
@@ -619,6 +711,13 @@
       </section>
 
       <section id="phase2" class="hidden">
+        <div id="live-matches-phase2" class="card live-matches-card hidden">
+          <h2>⚽ <span id="live-title-2">En vivo / Próximos</span></h2>
+          <div id="live-matches-container-2"></div>
+          <div class="countdown" id="countdown-2"></div>
+          <div class="small" id="live-note-2" style="margin-top:0.5rem;">Horarios locales del estadio.</div>
+        </div>
+
         <div class="card">
           <h2>🔮 <span id="phase2-title">Fase 2: Qué pasaría si...</span></h2>
           <p id="phase2-desc">Juega con los resultados de los partidos que faltan. Solo necesitas llenar los marcadores; las cuotas de Polymarket se usan automáticamente, pero puedes cambiarlas si quieres.</p>
@@ -710,6 +809,27 @@
         autofillDesc: 'Rellena automáticamente todos los partidos restantes con el resultado más probable según las cuotas de Polymarket. Luego puedes ajustar los marcadores a mano.',
         autofillBtn: 'Autofill con Polymarket',
         progress: '{filled} de {total} resultados ingresados',
+        liveTitle: 'En vivo / Próximos',
+        liveNote: 'Horarios locales del estadio.',
+        liveNow: 'EN VIVO',
+        startsIn: 'Próximo partido en',
+        finishedShort: 'Finalizado',
+        upcomingShort: 'Próximo',
+        noUpcoming: 'No hay partidos programados por ahora.',
+        ecuadorNeeds: 'Ecuador necesita',
+        ecuadorWin: 'Gana {team}',
+        ecuadorDraw: 'Empate',
+        ecuadorFavors: 'Favorece a Ecuador',
+        ecuadorComplicates: 'Complica a Ecuador',
+        ecuadorNeutral: 'Neutral para Ecuador',
+        ecuadorVeryGood: 'Muy bueno para Ecuador',
+        ecuadorGood: 'Bueno para Ecuador',
+        ecuadorBad: 'Malo para Ecuador',
+        ecuadorVeryBad: 'Muy malo para Ecuador',
+        days: 'd',
+        hours: 'h',
+        minutes: 'm',
+        seconds: 's',
         expandAll: 'Expandir todo',
         collapseAll: 'Colapsar todo',
         showOdds: 'Mostrar cuotas ▼',
@@ -788,6 +908,27 @@
         autofillDesc: 'Automatically fill all remaining matches with the most likely result according to Polymarket odds. Then you can adjust the scores manually.',
         autofillBtn: 'Autofill with Polymarket',
         progress: '{filled} of {total} scores entered',
+        liveTitle: 'Live / Upcoming',
+        liveNote: 'Stadium local times.',
+        liveNow: 'LIVE',
+        startsIn: 'Next match in',
+        finishedShort: 'Finished',
+        upcomingShort: 'Upcoming',
+        noUpcoming: 'No upcoming matches right now.',
+        ecuadorNeeds: 'Ecuador needs',
+        ecuadorWin: '{team} win',
+        ecuadorDraw: 'Draw',
+        ecuadorFavors: 'Favors Ecuador',
+        ecuadorComplicates: 'Hurts Ecuador',
+        ecuadorNeutral: 'Neutral for Ecuador',
+        ecuadorVeryGood: 'Very good for Ecuador',
+        ecuadorGood: 'Good for Ecuador',
+        ecuadorBad: 'Bad for Ecuador',
+        ecuadorVeryBad: 'Very bad for Ecuador',
+        days: 'd',
+        hours: 'h',
+        minutes: 'm',
+        seconds: 's',
         expandAll: 'Expand all',
         collapseAll: 'Collapse all',
         showOdds: 'Show odds ▼',
@@ -879,6 +1020,10 @@
       document.getElementById('autofill-title').textContent = t('autofillTitle');
       document.getElementById('autofill-desc').textContent = t('autofillDesc');
       document.getElementById('btn-autofill').textContent = t('autofillBtn');
+      document.getElementById('live-title').textContent = t('liveTitle');
+      document.getElementById('live-title-2').textContent = t('liveTitle');
+      document.getElementById('live-note').textContent = t('liveNote');
+      document.getElementById('live-note-2').textContent = t('liveNote');
     }
 
     // ===== Configuration =====
@@ -938,6 +1083,12 @@
     function safeFloat(v, def = 0) {
       const n = parseFloat(v);
       return isNaN(n) ? def : n;
+    }
+
+    function parseScoreValue(v) {
+      if (v === null || v === undefined || v === '' || String(v).toLowerCase() === 'null') return null;
+      const n = parseInt(v, 10);
+      return isNaN(n) ? null : n;
     }
 
     function teamName(id) {
@@ -1042,13 +1193,15 @@
         id: `wc26-${m.id}`,
         matchday: safeInt(m.matchday),
         group: m.group,
+        type: 'group',
         home_id: m.home_team_id,
         away_id: m.away_team_id,
         home_name: m.home_team_name_en,
         away_name: m.away_team_name_en,
-        home_score: m.finished === 'TRUE' ? safeInt(m.home_score) : null,
-        away_score: m.finished === 'TRUE' ? safeInt(m.away_score) : null,
+        home_score: parseScoreValue(m.home_score),
+        away_score: parseScoreValue(m.away_score),
         finished: m.finished === 'TRUE',
+        time_elapsed: m.time_elapsed,
         date: m.local_date,
         source: 'primary'
       }));
@@ -1089,6 +1242,7 @@
           id: `of-${i}`,
           matchday: 1,
           group: group,
+          type: 'group',
           home_id: homeId,
           away_id: awayId,
           home_name: homeName,
@@ -1096,6 +1250,7 @@
           home_score: finished ? safeInt(m.score.ft[0]) : null,
           away_score: finished ? safeInt(m.score.ft[1]) : null,
           finished: finished,
+          time_elapsed: finished ? 'finished' : 'notstarted',
           date: m.date,
           source: 'fallback'
         };
@@ -1431,9 +1586,15 @@
     function simulateOne(matches, fixed = {}, useMarket = false) {
       const sim = cloneMatches(matches);
       for (const m of sim) {
+        const isLive = m.time_elapsed === 'live';
         if (fixed[m.id] && fixed[m.id].home !== '' && fixed[m.id].away !== '') {
           m.home_score = safeInt(fixed[m.id].home);
           m.away_score = safeInt(fixed[m.id].away);
+          m.finished = true;
+        } else if (isLive) {
+          // keep current live score, mark as finished for standings calc
+          m.home_score = safeInt(m.home_score);
+          m.away_score = safeInt(m.away_score);
           m.finished = true;
         } else if (!m.finished) {
           const probs = getMatchProbabilities(m, useMarket);
@@ -1448,12 +1609,12 @@
       return isQualified(state.ecuadorId, st, tp);
     }
 
-    function runMonteCarlo(matches, fixed = {}, useMarket = false) {
+    function runMonteCarlo(matches, fixed = {}, useMarket = false, simulations = SIMULATIONS) {
       let qualified = 0;
-      for (let i = 0; i < SIMULATIONS; i++) {
+      for (let i = 0; i < simulations; i++) {
         if (simulateOne(matches, fixed, useMarket)) qualified++;
       }
-      return qualified / SIMULATIONS;
+      return qualified / simulations;
     }
 
     function computeAll() {
@@ -1480,6 +1641,7 @@
       document.getElementById('data-source').textContent = `${t('dataSource')}: ${state.dataSource} • ${nowStr}`;
 
       renderProbabilityValues();
+      renderLiveMatches();
       document.getElementById('group-e-table').innerHTML = renderGroupTable(state.standings['E'], 'E');
       document.getElementById('third-place-table').innerHTML = renderThirdPlaceTable(state.thirdPlace);
       document.getElementById('all-groups').innerHTML = renderAllGroups();
@@ -1490,6 +1652,225 @@
         renderProbability('hypothetical-probability', 'hypothetical-status', state.hypotheticalProbability, null, null, true);
         document.getElementById('hypothetical-group-e').innerHTML = renderGroupTable(computeStandingsFromMatches(applyHypotheticalToMatches()).E, 'E');
         document.getElementById('hypothetical-third-place').innerHTML = renderThirdPlaceTable(computeThirdPlace(computeStandingsFromMatches(applyHypotheticalToMatches())));
+      }
+    }
+
+    // ===== Live matches & countdown =====
+    let countdownInterval = null;
+    let liveRefreshInterval = null;
+
+    function parseMatchDate(dateStr) {
+      // local_date format: "MM/DD/YYYY HH:mm"
+      if (!dateStr) return null;
+      const [datePart, timePart] = dateStr.split(' ');
+      if (!datePart || !timePart) return null;
+      const [month, day, year] = datePart.split('/').map(Number);
+      const [hours, minutes] = timePart.split(':').map(Number);
+      return new Date(year, month - 1, day, hours, minutes, 0);
+    }
+
+    function getLiveMatches() {
+      const now = new Date();
+      return state.matches
+        .filter(m => m.type === 'group')
+        .map(m => {
+          const matchDate = parseMatchDate(m.date);
+          let status = 'upcoming';
+          if (m.finished) status = 'finished';
+          else if (m.time_elapsed === 'live') status = 'live';
+          else if (matchDate && matchDate <= now) status = 'live';
+          return { ...m, matchDate, status };
+        })
+        .sort((a, b) => {
+          if (a.status === 'live' && b.status !== 'live') return -1;
+          if (b.status === 'live' && a.status !== 'live') return 1;
+          if (!a.matchDate) return 1;
+          if (!b.matchDate) return -1;
+          return a.matchDate - b.matchDate;
+        });
+    }
+
+    function renderLiveMatches() {
+      const matches = getLiveMatches();
+      const live = matches.filter(m => m.status === 'live');
+      const upcoming = matches.filter(m => m.status === 'upcoming');
+      const container1 = document.getElementById('live-matches-container');
+      const container2 = document.getElementById('live-matches-container-2');
+      const card1 = document.getElementById('live-matches-phase1');
+      const card2 = document.getElementById('live-matches-phase2');
+
+      const hasContent = live.length > 0 || upcoming.length > 0;
+      card1.classList.toggle('hidden', !hasContent);
+      card2.classList.toggle('hidden', !hasContent);
+
+      if (!hasContent) {
+        container1.innerHTML = `<p class="small">${t('noUpcoming')}</p>`;
+        container2.innerHTML = `<p class="small">${t('noUpcoming')}</p>`;
+        return;
+      }
+
+      const html = buildLiveMatchesHTML(live, upcoming);
+      container1.innerHTML = html;
+      container2.innerHTML = html;
+
+      startCountdown();
+      startLiveRefresh(live.length > 0);
+    }
+
+    function buildLiveMatchesHTML(live, upcoming) {
+      let html = '';
+      for (const m of live) {
+        html += buildMatchRow(m, 'live');
+      }
+      // Show only the immediate next kickoff group (all matches at the same next time)
+      if (upcoming.length > 0 && upcoming[0].matchDate) {
+        const nextTime = upcoming[0].matchDate.getTime();
+        const nextGroup = upcoming.filter(m => m.matchDate && m.matchDate.getTime() === nextTime);
+        for (const m of nextGroup) {
+          html += buildMatchRow(m, 'upcoming');
+        }
+      }
+      return html;
+    }
+
+    function getMatchContext(m, status) {
+      const useMarket = state.useMarketOdds ?? true;
+      if (status === 'live') {
+        const current = runMonteCarlo(state.matches, { [m.id]: { home: m.home_score, away: m.away_score } }, useMarket, 800);
+        const outcomes = [
+          { h: 1, a: 0 }, { h: 2, a: 0 }, { h: 2, a: 1 },
+          { h: 0, a: 1 }, { h: 0, a: 2 }, { h: 1, a: 2 },
+          { h: 1, a: 1 }, { h: 0, a: 0 }, { h: 2, a: 2 }
+        ];
+        const probs = outcomes.map(o => runMonteCarlo(state.matches, { [m.id]: { home: o.h, away: o.a } }, useMarket, 800));
+        const min = Math.min(...probs);
+        const max = Math.max(...probs);
+        const ratio = max > min ? (current - min) / (max - min) : 0.5;
+        let label, cls, emoji;
+        if (ratio >= 0.8) { label = t('ecuadorVeryGood'); cls = 'very-good'; emoji = '🔥'; }
+        else if (ratio >= 0.55) { label = t('ecuadorGood'); cls = 'good'; emoji = '👍'; }
+        else if (ratio >= 0.45) { label = t('ecuadorNeutral'); cls = 'neutral'; emoji = '😐'; }
+        else if (ratio >= 0.2) { label = t('ecuadorBad'); cls = 'bad'; emoji = '👎'; }
+        else { label = t('ecuadorVeryBad'); cls = 'very-bad'; emoji = '💔'; }
+        return { label, cls, emoji, ratio };
+      } else {
+        const homeWin = runMonteCarlo(state.matches, { [m.id]: { home: 1, away: 0 } }, useMarket, 600);
+        const draw = runMonteCarlo(state.matches, { [m.id]: { home: 1, away: 1 } }, useMarket, 600);
+        const awayWin = runMonteCarlo(state.matches, { [m.id]: { home: 0, away: 1 } }, useMarket, 600);
+        const scenarios = [
+          { key: 'home', prob: homeWin, team: teamName(m.home_id) },
+          { key: 'draw', prob: draw, team: null },
+          { key: 'away', prob: awayWin, team: teamName(m.away_id) }
+        ];
+        scenarios.sort((a, b) => b.prob - a.prob);
+        const best = scenarios[0];
+        let label, cls;
+        if (best.key === 'draw') {
+          label = `${t('ecuadorNeeds')}: ${t('ecuadorDraw')}`;
+          cls = 'neutral';
+        } else {
+          label = `${t('ecuadorNeeds')}: ${t('ecuadorWin').replace('{team}', best.team)}`;
+          cls = 'good';
+        }
+        return { label, cls, emoji: '🇪🇨' };
+      }
+    }
+
+    function buildMatchRow(m, status) {
+      const hasScore = m.home_score !== null && m.away_score !== null && !isNaN(m.home_score) && !isNaN(m.away_score);
+      const score = hasScore ? `${m.home_score} - ${m.away_score}` : ' - ';
+      let statusLabel, statusClass;
+      if (status === 'live') { statusLabel = t('liveNow'); statusClass = ''; }
+      else if (status === 'finished') { statusLabel = t('finishedShort'); statusClass = 'finished'; }
+      else { statusLabel = t('upcomingShort'); statusClass = 'upcoming'; }
+      const timeStr = m.matchDate
+        ? m.matchDate.toLocaleString(lang === 'es' ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+        : (m.date || '');
+      const ctx = getMatchContext(m, status);
+      return `<div class="live-match-row">
+        <div class="live-match-team home">
+          <img class="flag" src="${teamFlag(m.home_id)}" alt="">
+          <span>${teamName(m.home_id)}</span>
+        </div>
+        <div class="live-match-score">${score}</div>
+        <div class="live-match-team away">
+          <span>${teamName(m.away_id)}</span>
+          <img class="flag" src="${teamFlag(m.away_id)}" alt="">
+        </div>
+        <div class="live-match-status ${statusClass}">${statusLabel}</div>
+        <div class="live-match-time">${timeStr}</div>
+        <div class="live-match-context ${ctx.cls}" title="${ctx.label}">${ctx.emoji} ${ctx.label}</div>
+      </div>`;
+    }
+
+    function startCountdown() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    function updateCountdown() {
+      const upcoming = getLiveMatches().filter(m => m.status === 'upcoming');
+      const cd1 = document.getElementById('countdown');
+      const cd2 = document.getElementById('countdown-2');
+      if (!upcoming.length || !upcoming[0].matchDate) {
+        if (cd1) cd1.innerHTML = '';
+        if (cd2) cd2.innerHTML = '';
+        return;
+      }
+      const next = upcoming[0].matchDate;
+      const diff = next - new Date();
+      if (diff <= 0) {
+        if (cd1) cd1.innerHTML = `<span class="countdown-label">${t('liveNow')}</span>`;
+        if (cd2) cd2.innerHTML = `<span class="countdown-label">${t('liveNow')}</span>`;
+        return;
+      }
+      const fmt = formatCountdown(diff);
+      const html = `<div class="countdown-label">${t('startsIn')}</div>${fmt}`;
+      if (cd1) cd1.innerHTML = html;
+      if (cd2) cd2.innerHTML = html;
+    }
+
+    function formatCountdown(ms) {
+      const seconds = Math.floor(ms / 1000);
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      const parts = [];
+      if (days > 0) parts.push(`${days}${t('days')}`);
+      if (hours > 0 || days > 0) parts.push(`${hours}${t('hours')}`);
+      parts.push(`${minutes}${t('minutes')}`);
+      parts.push(`${secs}${t('seconds')}`);
+      return parts.join(' ');
+    }
+
+    function startLiveRefresh(hasLive) {
+      if (liveRefreshInterval) clearInterval(liveRefreshInterval);
+      if (!hasLive) return;
+      liveRefreshInterval = setInterval(() => {
+        fetchLiveScores();
+      }, 60000);
+    }
+
+    async function fetchLiveScores() {
+      try {
+        const data = await fetchJSON(API_PRIMARY_GAMES);
+        const games = data.games || data;
+        for (const g of games) {
+          const matchId = `wc26-${g.id}`;
+          const m = state.matches.find(x => x.id === matchId);
+          if (m) {
+            m.home_score = parseScoreValue(g.home_score);
+            m.away_score = parseScoreValue(g.away_score);
+            m.finished = g.finished === 'TRUE';
+            m.time_elapsed = g.time_elapsed;
+          }
+        }
+        computeAll();
+        render();
+      } catch (e) {
+        console.warn('Live refresh failed:', e);
       }
     }
 
