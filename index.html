@@ -464,20 +464,6 @@
       font-size: 0.75rem;
       color: #555;
     }
-    .live-match-context {
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      white-space: nowrap;
-      background: #e9ecef;
-      color: #495057;
-    }
-    .live-match-context.very-good { background: #d4edda; color: #155724; }
-    .live-match-context.good { background: #e8f5e9; color: #2e7d32; }
-    .live-match-context.neutral { background: #fff3cd; color: #856404; }
-    .live-match-context.bad { background: #ffccbc; color: #bf360c; }
-    .live-match-context.very-bad { background: #f8d7da; color: #721c24; }
     .countdown {
       text-align: center;
       font-size: 1.4rem;
@@ -628,7 +614,6 @@
       .live-match-row { padding: 0.35rem 0.6rem; font-size: 0.8rem; flex-wrap: wrap; }
       .live-match-score { font-size: 0.85rem; min-width: 32px; }
       .live-match-status { font-size: 0.55rem; }
-      .live-match-context { font-size: 0.65rem; width: 100%; text-align: center; margin-top: 0.2rem; }
       .countdown { font-size: 1.1rem; }
     }
   </style>
@@ -816,16 +801,6 @@
         finishedShort: 'Finalizado',
         upcomingShort: 'Próximo',
         noUpcoming: 'No hay partidos programados por ahora.',
-        ecuadorNeeds: 'Ecuador necesita',
-        ecuadorWin: 'Gana {team}',
-        ecuadorDraw: 'Empate',
-        ecuadorFavors: 'Favorece a Ecuador',
-        ecuadorComplicates: 'Complica a Ecuador',
-        ecuadorNeutral: 'Neutral para Ecuador',
-        ecuadorVeryGood: 'Muy bueno para Ecuador',
-        ecuadorGood: 'Bueno para Ecuador',
-        ecuadorBad: 'Malo para Ecuador',
-        ecuadorVeryBad: 'Muy malo para Ecuador',
         days: 'd',
         hours: 'h',
         minutes: 'm',
@@ -915,16 +890,6 @@
         finishedShort: 'Finished',
         upcomingShort: 'Upcoming',
         noUpcoming: 'No upcoming matches right now.',
-        ecuadorNeeds: 'Ecuador needs',
-        ecuadorWin: '{team} win',
-        ecuadorDraw: 'Draw',
-        ecuadorFavors: 'Favors Ecuador',
-        ecuadorComplicates: 'Hurts Ecuador',
-        ecuadorNeutral: 'Neutral for Ecuador',
-        ecuadorVeryGood: 'Very good for Ecuador',
-        ecuadorGood: 'Good for Ecuador',
-        ecuadorBad: 'Bad for Ecuador',
-        ecuadorVeryBad: 'Very bad for Ecuador',
         days: 'd',
         hours: 'h',
         minutes: 'm',
@@ -1189,22 +1154,27 @@
         };
       }
 
-      state.matches = games.filter(m => m.type === 'group').map(m => ({
-        id: `wc26-${m.id}`,
-        matchday: safeInt(m.matchday),
-        group: m.group,
-        type: 'group',
-        home_id: m.home_team_id,
-        away_id: m.away_team_id,
-        home_name: m.home_team_name_en,
-        away_name: m.away_team_name_en,
-        home_score: parseScoreValue(m.home_score),
-        away_score: parseScoreValue(m.away_score),
-        finished: m.finished === 'TRUE',
-        time_elapsed: m.time_elapsed,
-        date: m.local_date,
-        source: 'primary'
-      }));
+      state.matches = games.filter(m => m.type === 'group').map(m => {
+        const finished = m.finished === 'TRUE';
+        const live = m.time_elapsed === 'live';
+        const hasScore = finished || live;
+        return {
+          id: `wc26-${m.id}`,
+          matchday: safeInt(m.matchday),
+          group: m.group,
+          type: 'group',
+          home_id: m.home_team_id,
+          away_id: m.away_team_id,
+          home_name: m.home_team_name_en,
+          away_name: m.away_team_name_en,
+          home_score: hasScore ? parseScoreValue(m.home_score) : null,
+          away_score: hasScore ? parseScoreValue(m.away_score) : null,
+          finished: finished,
+          time_elapsed: m.time_elapsed,
+          date: m.local_date,
+          source: 'primary'
+        };
+      });
 
       for (const m of state.matches) {
         if (!state.teams[m.home_id]) state.teams[m.home_id] = { id: m.home_id, name_en: m.home_name };
@@ -1733,49 +1703,6 @@
       return html;
     }
 
-    function getMatchContext(m, status) {
-      const useMarket = state.useMarketOdds ?? true;
-      if (status === 'live') {
-        const current = runMonteCarlo(state.matches, { [m.id]: { home: m.home_score, away: m.away_score } }, useMarket, 800);
-        const outcomes = [
-          { h: 1, a: 0 }, { h: 2, a: 0 }, { h: 2, a: 1 },
-          { h: 0, a: 1 }, { h: 0, a: 2 }, { h: 1, a: 2 },
-          { h: 1, a: 1 }, { h: 0, a: 0 }, { h: 2, a: 2 }
-        ];
-        const probs = outcomes.map(o => runMonteCarlo(state.matches, { [m.id]: { home: o.h, away: o.a } }, useMarket, 800));
-        const min = Math.min(...probs);
-        const max = Math.max(...probs);
-        const ratio = max > min ? (current - min) / (max - min) : 0.5;
-        let label, cls, emoji;
-        if (ratio >= 0.8) { label = t('ecuadorVeryGood'); cls = 'very-good'; emoji = '🔥'; }
-        else if (ratio >= 0.55) { label = t('ecuadorGood'); cls = 'good'; emoji = '👍'; }
-        else if (ratio >= 0.45) { label = t('ecuadorNeutral'); cls = 'neutral'; emoji = '😐'; }
-        else if (ratio >= 0.2) { label = t('ecuadorBad'); cls = 'bad'; emoji = '👎'; }
-        else { label = t('ecuadorVeryBad'); cls = 'very-bad'; emoji = '💔'; }
-        return { label, cls, emoji, ratio };
-      } else {
-        const homeWin = runMonteCarlo(state.matches, { [m.id]: { home: 1, away: 0 } }, useMarket, 600);
-        const draw = runMonteCarlo(state.matches, { [m.id]: { home: 1, away: 1 } }, useMarket, 600);
-        const awayWin = runMonteCarlo(state.matches, { [m.id]: { home: 0, away: 1 } }, useMarket, 600);
-        const scenarios = [
-          { key: 'home', prob: homeWin, team: teamName(m.home_id) },
-          { key: 'draw', prob: draw, team: null },
-          { key: 'away', prob: awayWin, team: teamName(m.away_id) }
-        ];
-        scenarios.sort((a, b) => b.prob - a.prob);
-        const best = scenarios[0];
-        let label, cls;
-        if (best.key === 'draw') {
-          label = `${t('ecuadorNeeds')}: ${t('ecuadorDraw')}`;
-          cls = 'neutral';
-        } else {
-          label = `${t('ecuadorNeeds')}: ${t('ecuadorWin').replace('{team}', best.team)}`;
-          cls = 'good';
-        }
-        return { label, cls, emoji: '🇪🇨' };
-      }
-    }
-
     function buildMatchRow(m, status) {
       const hasScore = m.home_score !== null && m.away_score !== null && !isNaN(m.home_score) && !isNaN(m.away_score);
       const score = hasScore ? `${m.home_score} - ${m.away_score}` : ' - ';
@@ -1786,7 +1713,6 @@
       const timeStr = m.matchDate
         ? m.matchDate.toLocaleString(lang === 'es' ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
         : (m.date || '');
-      const ctx = getMatchContext(m, status);
       return `<div class="live-match-row">
         <div class="live-match-team home">
           <img class="flag" src="${teamFlag(m.home_id)}" alt="">
@@ -1799,7 +1725,6 @@
         </div>
         <div class="live-match-status ${statusClass}">${statusLabel}</div>
         <div class="live-match-time">${timeStr}</div>
-        <div class="live-match-context ${ctx.cls}" title="${ctx.label}">${ctx.emoji} ${ctx.label}</div>
       </div>`;
     }
 
@@ -1861,9 +1786,12 @@
           const matchId = `wc26-${g.id}`;
           const m = state.matches.find(x => x.id === matchId);
           if (m) {
-            m.home_score = parseScoreValue(g.home_score);
-            m.away_score = parseScoreValue(g.away_score);
-            m.finished = g.finished === 'TRUE';
+            const finished = g.finished === 'TRUE';
+            const live = g.time_elapsed === 'live';
+            const hasScore = finished || live;
+            m.home_score = hasScore ? parseScoreValue(g.home_score) : null;
+            m.away_score = hasScore ? parseScoreValue(g.away_score) : null;
+            m.finished = finished;
             m.time_elapsed = g.time_elapsed;
           }
         }
